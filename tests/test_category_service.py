@@ -1,5 +1,5 @@
 from tests.test_base import BaseTest
-from models import Category
+from src.models import Category
 
 class TestCategoryService(BaseTest):
     """

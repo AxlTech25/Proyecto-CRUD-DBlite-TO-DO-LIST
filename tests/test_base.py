@@ -1,8 +1,8 @@
 import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base
-from services import UserService, TaskService, CategoryService, NotificationService
+from src.models import Base
+from src.services import UserService, TaskService, CategoryService, NotificationService
 
 class BaseTest(unittest.TestCase):
     """

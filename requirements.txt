@@ -1,1 +1,2 @@
+python -m venv venv
 SQLAlchemy==2.0.30

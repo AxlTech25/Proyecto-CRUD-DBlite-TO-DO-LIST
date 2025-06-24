@@ -1,8 +1,8 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, User, TaskState, TaskPriority, TaskFrequency
-from services import UserService, TaskService, CategoryService, NotificationService
+from src.models import Base, User, TaskState, TaskPriority, TaskFrequency
+from src.services import UserService, TaskService, CategoryService, NotificationService
 from datetime import datetime, timedelta
 
 # Asegura que el directorio 'data' exista

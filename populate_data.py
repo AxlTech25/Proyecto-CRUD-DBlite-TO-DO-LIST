@@ -1,8 +1,8 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, User, TaskState, TaskPriority, TaskFrequency, Category, Task, Notification
-from services import UserService, TaskService, CategoryService, NotificationService
+from src.models import Base, User, TaskState, TaskPriority, TaskFrequency, Category, Task, Notification
+from src.services import UserService, TaskService, CategoryService, NotificationService
 from datetime import datetime, timedelta
 import random
 

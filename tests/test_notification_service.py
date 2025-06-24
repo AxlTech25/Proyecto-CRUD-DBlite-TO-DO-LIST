@@ -1,5 +1,5 @@
 from tests.test_base import BaseTest
-from models import Notification, TaskState
+from src.models import Notification, TaskState
 from datetime import datetime, timedelta
 
 class TestNotificationService(BaseTest):

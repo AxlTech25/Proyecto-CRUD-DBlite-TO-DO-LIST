@@ -1,5 +1,5 @@
 from tests.test_base import BaseTest
-from models import User
+from src.models import User
 
 class TestUserService(BaseTest):
     """

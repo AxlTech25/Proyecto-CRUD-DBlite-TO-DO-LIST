@@ -1,5 +1,5 @@
 from tests.test_base import BaseTest
-from models import Task, TaskState, TaskPriority, TaskFrequency
+from src.models import Task, TaskState, TaskPriority, TaskFrequency
 from datetime import datetime, timedelta
 
 class TestTaskService(BaseTest):
