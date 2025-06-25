@@ -13,7 +13,7 @@ Este proyecto implementa un sistema básico de gestión de tareas con funcionali
 * **Validaciones Básicas**: Verificación de campos obligatorios, tipos de datos y formatos (ej. correo electrónico, longitud de contraseña).
 
 * **Pruebas Unitarias Robustas**: Cobertura de pruebas para la lógica de negocio, utilizando una base de datos en memoria para asegurar el aislamiento.
-* 
+  
 * **Tener una estructura organizada (ej: src/, docs/, tests/).
 
 * **Diseño por Capas**: Organización clara del código en `models`, `repositories` y `services`.
