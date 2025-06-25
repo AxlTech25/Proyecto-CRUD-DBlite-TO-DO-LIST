@@ -24,11 +24,9 @@ Este proyecto implementa un sistema básico de gestión de tareas con funcionali
 
 ```
 proyecto/
-├── data/
-│   └── database.db          # Base de datos SQLite (generada al ejecutar main.py)
 ├── docs/
 │   ├── .gitignore          # Exporta los modelos
-│   ├── base.py              # Base declarativa de SQLAlchemy
+│   ├── README.md           # Instruccion de Ejecución
 ├── src/
 ├── models/
 │   ├── __init__.py          # Exporta los modelos
@@ -57,9 +55,11 @@ proyecto/
 │   ├── test_notification_service.py # Pruebas para NotificationService
 │   ├── test_task_service.py # Pruebas para TaskService
 │   └── test_user_service.py # Pruebas para UserService
-├── main.py                  # Punto de entrada y demostración CRUD
-├── populate_data.py         # Script para insertar datos simulados
-└── requirements.txt         # Dependencias del proyecto
+├── app_gui.py             # Interfaz grafica de usuario
+├── main.py                # Punto de entrada y demostración CRUD
+├── populate_data.py       # Script para insertar datos simulados
+├── requirements.txt       # Dependencias del proyecto
+└── task_manager_ui.ui     # Interfaz de usuario
 ```
 
 ## Tecnologías Utilizadas
