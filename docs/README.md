@@ -94,7 +94,8 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
     ```
     Bash
     ```
-    venv/bin/activate
+    Si ocurre un error de permisos
+    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
     ```
     Instala las Dependencias:
     Con el entorno virtual activado, instala las bibliotecas necesarias listadas en requirements.txt:
