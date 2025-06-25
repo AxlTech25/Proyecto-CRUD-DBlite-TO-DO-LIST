@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from repositories.category_repository import CategoryRepository
-from models.category import Category
+from src.repositories.category_repository import CategoryRepository
+from src.models.category import Category
 from typing import List, Dict, Any
 
 class CategoryService:

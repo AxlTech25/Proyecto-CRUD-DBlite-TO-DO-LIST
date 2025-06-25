@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from repositories.notification_repository import NotificationRepository
-from models.notification import Notification
-from models.task import Task
+from src.repositories.notification_repository import NotificationRepository
+from src.models.notification import Notification
+from src.models.task import Task
 from typing import List, Dict, Any
 from datetime import datetime
 

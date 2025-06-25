@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from repositories.task_repository import TaskRepository
-from models.task import Task, TaskState, TaskPriority, TaskFrequency
-from models.user import User
-from models.category import Category
+from src.repositories.task_repository import TaskRepository
+from src.models.task import Task, TaskState, TaskPriority, TaskFrequency
+from src.models.user import User
+from src.models.category import Category
 from typing import List, Dict, Any
 from datetime import datetime
 

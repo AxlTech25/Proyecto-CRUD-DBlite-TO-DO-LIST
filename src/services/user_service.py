@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from repositories.user_repository import UserRepository
-from models.user import User
+from src.repositories.user_repository import UserRepository
+from src.models.user import User
 from typing import List, Dict, Any
 import re
 
