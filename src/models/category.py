@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from models.base import Base
-from models.task import TaskCategory  # Importar la tabla de asociación
+from src.models.base import Base
+from src.models.task import TaskCategory  # Importar la tabla de asociación
 
 class Category(Base):
     """
