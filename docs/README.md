@@ -80,8 +80,7 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
     Windows:
 
     ```Bash
-    .\venv\Scripts\activate
-    macOS/Linux:
+    .\venv\Scripts\activate.ps1
     ```
     Bash
     ```
@@ -134,6 +133,12 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
     Bash
     ```
     python -m unittest discover tests
+    python -m unittest .\tests\test_category_service.py
+    ```
+    Ejecucion de la Aplicación
+    Bash
+    ```
+    python app gui.py
     ```
     Si todas las pruebas pasan, verás un mensaje "OK". En caso contrario, se mostrarán los detalles de los fallos.
 
