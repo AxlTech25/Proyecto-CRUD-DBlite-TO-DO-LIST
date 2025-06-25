@@ -87,9 +87,6 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
 
     ```Bash
     .\venv\Scripts\activate.ps1
-
-    Si ocurre un error de permisos
-    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
     
     ```
     Bash
