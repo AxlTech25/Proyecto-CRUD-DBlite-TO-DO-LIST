@@ -13,6 +13,8 @@ Este proyecto implementa un sistema básico de gestión de tareas con funcionali
 * **Validaciones Básicas**: Verificación de campos obligatorios, tipos de datos y formatos (ej. correo electrónico, longitud de contraseña).
 
 * **Pruebas Unitarias Robustas**: Cobertura de pruebas para la lógica de negocio, utilizando una base de datos en memoria para asegurar el aislamiento.
+* 
+* **Tener una estructura organizada (ej: src/, docs/, tests/).
 
 * **Diseño por Capas**: Organización clara del código en `models`, `repositories` y `services`.
 
@@ -24,6 +26,10 @@ Este proyecto implementa un sistema básico de gestión de tareas con funcionali
 proyecto/
 ├── data/
 │   └── database.db          # Base de datos SQLite (generada al ejecutar main.py)
+├── docs/
+│   ├── .gitignore          # Exporta los modelos
+│   ├── base.py              # Base declarativa de SQLAlchemy
+├── src/
 ├── models/
 │   ├── __init__.py          # Exporta los modelos
 │   ├── base.py              # Base declarativa de SQLAlchemy
@@ -81,6 +87,10 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
 
     ```Bash
     .\venv\Scripts\activate.ps1
+
+    Si ocurre un error de permisos
+    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+    
     ```
     Bash
     ```
@@ -138,7 +148,7 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
     Ejecucion de la Aplicación
     Bash
     ```
-    python app gui.py
+    python app_gui.py
     ```
     Si todas las pruebas pasan, verás un mensaje "OK". En caso contrario, se mostrarán los detalles de los fallos.
 
