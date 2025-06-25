@@ -1,2 +1,2 @@
-python -m venv venv
 SQLAlchemy==2.0.30
+PyQt5==5.15.10
