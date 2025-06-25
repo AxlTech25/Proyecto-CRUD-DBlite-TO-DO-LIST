@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models.notification import Notification
-from repositories.base_repository import BaseRepository
+from src.models.notification import Notification
+from src.repositories.base_repository import BaseRepository
 
 class NotificationRepository(BaseRepository[Notification]):
     """

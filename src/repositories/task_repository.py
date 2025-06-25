@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from models.task import Task, TaskCategory
-from models.category import Category
-from repositories.base_repository import BaseRepository
+from src.models.task import Task, TaskCategory
+from src.models.category import Category
+from src.repositories.base_repository import BaseRepository
 from typing import List
 
 class TaskRepository(BaseRepository[Task]):
