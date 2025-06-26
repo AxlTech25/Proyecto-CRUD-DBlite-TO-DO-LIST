@@ -1,13 +1,16 @@
 import os
 import sys
 from datetime import datetime, timedelta
+import functools # ¡Nueva libreria utilizada para poder modificar el codigo sin necesidad de reescribir la logica!
 
+# Importaciones para PyQt5
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTableWidgetItem, QMessageBox,
-    QHeaderView, QAbstractItemView, QDateTimeEdit, QComboBox, QCheckBox, QTextEdit
+    QHeaderView, QAbstractItemView, QDateTimeEdit, QComboBox, QCheckBox, QTextEdit,
+    QWidget, QHBoxLayout, QPushButton
 )
 from PyQt5 import uic
-from PyQt5.QtCore import QDateTime
+from PyQt5.QtCore import QDateTime, Qt # Importar Qt para flags de QMessageBox
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -103,31 +106,33 @@ class TaskManagerApp(QMainWindow):
         # Tabla de Usuarios
         self.usersTable.setColumnCount(4)
         self.usersTable.setHorizontalHeaderLabels(["ID", "Nombre", "Correo", "Acciones"])
-        self.usersTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.usersTable.setSelectionBehavior(QAbstractItemView.SelectRows) # Seleccionar filas completas
+        self.usersTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch) # PyQt5
+        self.usersTable.setSelectionBehavior(QAbstractItemView.SelectRows) # PyQt5
 
         # Tabla de Categorías
         self.categoriesTable.setColumnCount(3)
         self.categoriesTable.setHorizontalHeaderLabels(["ID", "Nombre", "Acciones"])
-        self.categoriesTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.categoriesTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.categoriesTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch) # PyQt5
+        self.categoriesTable.setSelectionBehavior(QAbstractItemView.SelectRows) # PyQt5
 
         # Tabla de Tareas
         self.tasksTable.setColumnCount(7)
         self.tasksTable.setHorizontalHeaderLabels(["ID", "Título", "Estado", "Prioridad", "Usuario (ID)", "Categorías", "Acciones"])
-        self.tasksTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tasksTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tasksTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch) # PyQt5
+        self.tasksTable.setSelectionBehavior(QAbstractItemView.SelectRows) # PyQt5
 
         # Tabla de Notificaciones
         self.notificationsTable.setColumnCount(4)
         self.notificationsTable.setHorizontalHeaderLabels(["ID", "Tarea (ID)", "Fecha de Envío", "Acciones"])
-        self.notificationsTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.notificationsTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.notificationsTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch) # PyQt5
+        self.notificationsTable.setSelectionBehavior(QAbstractItemView.SelectRows) # PyQt5
         
         # Llenar ComboBoxes de enums
         self.taskStateInput.addItems([e.value for e in TaskState])
         self.taskPriorityInput.addItems([p.value for p in TaskPriority])
-        self.taskFrequencyInput.addItems([""] + [f.value for f in TaskFrequency]) # Vacío para "no recurrente"
+        # Asegurarse de que el QComboBox para frecuencia pueda tener una opción vacía
+        self.taskFrequencyInput.addItem("") # Opción vacía al principio
+        self.taskFrequencyInput.addItems([f.value for f in TaskFrequency])
 
         # Establecer la fecha/hora actual por defecto para los QDateTimeEdit
         self.taskStartDateInput.setDateTime(QDateTime.currentDateTime())
@@ -206,15 +211,27 @@ class TaskManagerApp(QMainWindow):
         self.usersTable.setRowCount(0) # Limpiar tabla
         users = self.user_service.get_all_users()
         for row_idx, user in enumerate(users):
-            self.usersTable.insertRow(row_idx)
-            self.usersTable.setItem(row_idx, 0, QTableWidgetItem(str(user.id_usuario)))
+            print(f"DEBUG: Processing user from DB: ID={user.id_usuario}, Name={user.nombre}, Type ID={type(user.id_usuario)}") # NEW DEBUG PRINT
+            
+            # Ensure id_usuario is int and positive before setting
+            user_id_for_display = None
+            try:
+                user_id_for_display = int(user.id_usuario)
+                if user_id_for_display <= 0:
+                    raise ValueError("ID de usuario no es positivo.")
+            except (ValueError, TypeError) as e:
+                print(f"DEBUG: Skipping user due to invalid ID during load: {user.id_usuario} - {e}")
+                continue # Skip this row if ID is invalid
+
+            self.usersTable.insertRow(row_idx) # Insert row only if ID is valid
+            self.usersTable.setItem(row_idx, 0, QTableWidgetItem(str(user_id_for_display)))
             self.usersTable.setItem(row_idx, 1, QTableWidgetItem(user.nombre))
             self.usersTable.setItem(row_idx, 2, QTableWidgetItem(user.correo))
 
-            # Añadir botones de acciones
+            # Añadir botones de acciones usando functools.partial
             actions_cell = self._create_actions_widget(
-                edit_func=lambda u=user: self._load_user_into_form(row_idx, 0), # Cargar para edición
-                delete_func=lambda u_id=user.id_usuario: self._delete_user(u_id)
+                edit_func=functools.partial(self._load_user_into_form, row_idx, 0),
+                delete_func=functools.partial(self._delete_user, user_id_for_display)
             )
             self.usersTable.setCellWidget(row_idx, 3, actions_cell)
 
@@ -258,7 +275,22 @@ class TaskManagerApp(QMainWindow):
 
     def _load_user_into_form(self, row, column):
         """Carga los datos de un usuario seleccionado en el formulario para edición."""
-        self.current_user_id = int(self.usersTable.item(row, 0).text())
+        self.current_user_id = None # Reiniciar por si hay errores
+
+        item = self.usersTable.item(row, 0)
+        if item is None or not item.text():
+            self._show_error_message("Error de Lectura", "No se pudo obtener el ID del usuario de la tabla. Celda vacía.")
+            return
+
+        try:
+            user_id_from_table = int(item.text())
+            if user_id_from_table <= 0:
+                raise ValueError("El ID de usuario de la tabla no es positivo.")
+            self.current_user_id = user_id_from_table
+        except ValueError as e:
+            self._show_error_message("Error de Lectura", f"ID de usuario inválido en la tabla: {e}. Valor: '{item.text()}'")
+            return
+
         user = self.user_service.get_user_by_id(self.current_user_id)
         if user:
             self.userNameInput.setText(user.nombre)
@@ -266,15 +298,27 @@ class TaskManagerApp(QMainWindow):
             # No cargar la contraseña por seguridad; el usuario debe reintroducirla para cambiarla.
             self.userPasswordInput.clear()
         else:
-            self._show_error_message("Error", "No se pudo cargar el usuario para edición.")
+            # Esto puede pasar si el usuario fue eliminado por otra operación justo antes de hacer click
+            self._show_warning_message("Usuario No Encontrado", f"El usuario con ID {self.current_user_id} no se encontró en la base de datos.")
+            self.current_user_id = None # Resetear el ID actual ya que no existe
+            self._clear_user_form() # Limpiar formulario si no se encuentra
+            self._load_users() # Recargar la tabla para reflejar el estado actual
 
     def _delete_user(self, user_id):
         """Elimina un usuario previa confirmación."""
+        print(f"DEBUG: Attempting to delete user_id: {user_id}, type: {type(user_id)}") # DEBUG PRINT
+        # Validación defensiva del ID antes de llamar al servicio
+        if not isinstance(user_id, int) or user_id <= 0:
+            print("DEBUG: Validation failed for user_id in _delete_user.") # DEBUG PRINT
+            self._show_warning_message("Error de Eliminación", "ID de usuario inválido para eliminar.")
+            return
+
         reply = QMessageBox.question(self, 'Confirmar Eliminación',
                                      f"¿Estás seguro de que quieres eliminar el usuario ID: {user_id}?\n"
                                      "Esto también eliminará todas sus tareas y notificaciones asociadas.",
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
+                                     QMessageBox.Yes | QMessageBox.No, # PyQt5
+                                     QMessageBox.No) # PyQt5
+        if reply == QMessageBox.Yes: # PyQt5
             try:
                 deleted = self.user_service.delete_user(user_id)
                 if deleted:
@@ -285,6 +329,7 @@ class TaskManagerApp(QMainWindow):
                 self._populate_user_combobox() # Recargar combobox de usuarios
                 self._load_tasks() # Recargar tareas por si se eliminaron cascada
                 self._load_notifications() # Recargar notificaciones por si se eliminaron cascada
+                self._clear_user_form() # Limpiar formulario después de eliminar
             except ValueError as e:
                 self._show_warning_message("Error de Validación", str(e))
             except Exception as e:
@@ -318,8 +363,8 @@ class TaskManagerApp(QMainWindow):
             self.categoriesTable.setItem(row_idx, 1, QTableWidgetItem(category.nombre))
 
             actions_cell = self._create_actions_widget(
-                edit_func=lambda c=category: self._load_category_into_form(row_idx, 0),
-                delete_func=lambda c_id=category.id_categoria: self._delete_category(c_id)
+                edit_func=functools.partial(self._load_category_into_form, row_idx, 0),
+                delete_func=functools.partial(self._delete_category, category.id_categoria)
             )
             self.categoriesTable.setCellWidget(row_idx, 2, actions_cell)
 
@@ -351,19 +396,42 @@ class TaskManagerApp(QMainWindow):
 
     def _load_category_into_form(self, row, column):
         """Carga los datos de una categoría seleccionada en el formulario."""
-        self.current_category_id = int(self.categoriesTable.item(row, 0).text())
+        self.current_category_id = None
+
+        item = self.categoriesTable.item(row, 0)
+        if item is None or not item.text():
+            self._show_error_message("Error de Lectura", "No se pudo obtener el ID de la categoría de la tabla. Celda vacía.")
+            return
+
+        try:
+            category_id_from_table = int(item.text())
+            if category_id_from_table <= 0:
+                raise ValueError("El ID de categoría de la tabla no es positivo.")
+            self.current_category_id = category_id_from_table
+        except ValueError as e:
+            self._show_error_message("Error de Lectura", f"ID de categoría inválido en la tabla: {e}. Valor: '{item.text()}'")
+            return
+
         category = self.category_service.get_category_by_id(self.current_category_id)
         if category:
             self.categoryNameInput.setText(category.nombre)
         else:
-            self._show_error_message("Error", "No se pudo cargar la categoría para edición.")
+            self._show_warning_message("Categoría No Encontrada", f"La categoría con ID {self.current_category_id} no se encontró en la base de datos.")
+            self.current_category_id = None
+            self._clear_category_form()
+            self._load_categories()
 
     def _delete_category(self, category_id):
         """Elimina una categoría previa confirmación."""
+        if not isinstance(category_id, int) or category_id <= 0:
+            self._show_warning_message("Error de Eliminación", "ID de categoría inválido para eliminar.")
+            return
+
         reply = QMessageBox.question(self, 'Confirmar Eliminación',
                                      f"¿Estás seguro de que quieres eliminar la categoría ID: {category_id}?",
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
+                                     QMessageBox.Yes | QMessageBox.No, # PyQt5
+                                     QMessageBox.No) # PyQt5
+        if reply == QMessageBox.Yes: # PyQt5
             try:
                 deleted = self.category_service.delete_category(category_id)
                 if deleted:
@@ -373,6 +441,7 @@ class TaskManagerApp(QMainWindow):
                 self._load_categories()
                 self._populate_category_combobox() # Recargar combobox de categorías
                 self._load_tasks() # Recargar tareas por si afectó categorías asociadas
+                self._clear_category_form() # Limpiar formulario después de eliminar
             except ValueError as e:
                 self._show_warning_message("Error de Validación", str(e))
             except Exception as e:
@@ -417,8 +486,8 @@ class TaskManagerApp(QMainWindow):
             self.tasksTable.setItem(row_idx, 5, QTableWidgetItem(categories_str if categories_str else "N/A"))
 
             actions_cell = self._create_actions_widget(
-                edit_func=lambda t=task: self._load_task_into_form(row_idx, 0),
-                delete_func=lambda t_id=task.id_tarea: self._delete_task(t_id)
+                edit_func=functools.partial(self._load_task_into_form, row_idx, 0),
+                delete_func=functools.partial(self._delete_task, task.id_tarea)
             )
             self.tasksTable.setCellWidget(row_idx, 6, actions_cell)
 
@@ -475,7 +544,22 @@ class TaskManagerApp(QMainWindow):
 
     def _load_task_into_form(self, row, column):
         """Carga los datos de una tarea seleccionada en el formulario."""
-        self.current_task_id = int(self.tasksTable.item(row, 0).text())
+        self.current_task_id = None
+
+        item = self.tasksTable.item(row, 0)
+        if item is None or not item.text():
+            self._show_error_message("Error de Lectura", "No se pudo obtener el ID de la tarea de la tabla. Celda vacía.")
+            return
+
+        try:
+            task_id_from_table = int(item.text())
+            if task_id_from_table <= 0:
+                raise ValueError("El ID de tarea de la tabla no es positivo.")
+            self.current_task_id = task_id_from_table
+        except ValueError as e:
+            self._show_error_message("Error de Lectura", f"ID de tarea inválido en la tabla: {e}. Valor: '{item.text()}'")
+            return
+
         task = self.task_service.get_task_by_id(self.current_task_id)
         if task:
             self.taskTitleInput.setText(task.titulo)
@@ -496,15 +580,23 @@ class TaskManagerApp(QMainWindow):
                 self.taskUserInput.setCurrentIndex(0) # Seleccionar "Seleccionar Usuario"
 
         else:
-            self._show_error_message("Error", "No se pudo cargar la tarea para edición.")
+            self._show_warning_message("Tarea No Encontrada", f"La tarea con ID {self.current_task_id} no se encontró en la base de datos.")
+            self.current_task_id = None
+            self._clear_task_form()
+            self._load_tasks()
 
     def _delete_task(self, task_id):
         """Elimina una tarea previa confirmación."""
+        if not isinstance(task_id, int) or task_id <= 0:
+            self._show_warning_message("Error de Eliminación", "ID de tarea inválido para eliminar.")
+            return
+
         reply = QMessageBox.question(self, 'Confirmar Eliminación',
                                      f"¿Estás seguro de que quieres eliminar la tarea ID: {task_id}?\n"
                                      "Esto también eliminará las notificaciones asociadas.",
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
+                                     QMessageBox.Yes | QMessageBox.No, # PyQt5
+                                     QMessageBox.No) # PyQt5
+        if reply == QMessageBox.Yes: # PyQt5
             try:
                 deleted = self.task_service.delete_task(task_id)
                 if deleted:
@@ -514,6 +606,7 @@ class TaskManagerApp(QMainWindow):
                 self._load_tasks()
                 self._populate_task_combobox() # Recargar combobox de tareas
                 self._load_notifications() # Recargar notificaciones
+                self._clear_task_form() # Limpiar formulario después de eliminar
             except ValueError as e:
                 self._show_warning_message("Error de Validación", str(e))
             except Exception as e:
@@ -527,7 +620,7 @@ class TaskManagerApp(QMainWindow):
         self.taskTitleInput.clear()
         self.taskDescriptionInput.clear()
         self.taskStartDateInput.setDateTime(QDateTime.currentDateTime())
-        self.taskDueDateInput.clear()
+        self.taskDueDateInput.clear() # Limpiar fecha de vencimiento
         self.taskStateInput.setCurrentIndex(0) # Pendiente
         self.taskPriorityInput.setCurrentIndex(1) # Media
         self.taskRecurringInput.setChecked(False)
@@ -558,7 +651,7 @@ class TaskManagerApp(QMainWindow):
         except Exception as e:
             self._show_error_message("Error del Sistema", f"Ocurrió un error inesperado: {e}")
         finally:
-            self.db.commit()
+                self.db.commit()
 
     def _remove_category_from_selected_task(self):
         """Desasocia la categoría seleccionada de la tarea actualmente cargada en el formulario."""
@@ -605,8 +698,8 @@ class TaskManagerApp(QMainWindow):
             self.notificationsTable.setItem(row_idx, 2, QTableWidgetItem(notification.fecha_envio.strftime("%Y-%m-%d %H:%M:%S")))
 
             actions_cell = self._create_actions_widget(
-                edit_func=lambda n=notification: self._load_notification_into_form(row_idx, 0),
-                delete_func=lambda n_id=notification.id_notificacion: self._delete_notification(n_id)
+                edit_func=functools.partial(self._load_notification_into_form, row_idx, 0),
+                delete_func=functools.partial(self._delete_notification, notification.id_notificacion)
             )
             self.notificationsTable.setCellWidget(row_idx, 3, actions_cell)
 
@@ -646,7 +739,22 @@ class TaskManagerApp(QMainWindow):
 
     def _load_notification_into_form(self, row, column):
         """Carga los datos de una notificación seleccionada en el formulario."""
-        self.current_notification_id = int(self.notificationsTable.item(row, 0).text())
+        self.current_notification_id = None
+
+        item = self.notificationsTable.item(row, 0)
+        if item is None or not item.text():
+            self._show_error_message("Error de Lectura", "No se pudo obtener el ID de la notificación de la tabla. Celda vacía.")
+            return
+
+        try:
+            notification_id_from_table = int(item.text())
+            if notification_id_from_table <= 0:
+                raise ValueError("El ID de notificación de la tabla no es positivo.")
+            self.current_notification_id = notification_id_from_table
+        except ValueError as e:
+            self._show_error_message("Error de Lectura", f"ID de notificación inválido en la tabla: {e}. Valor: '{item.text()}'")
+            return
+
         notification = self.notification_service.get_notification_by_id(self.current_notification_id)
         if notification:
             # Seleccionar tarea en el combobox
@@ -658,21 +766,30 @@ class TaskManagerApp(QMainWindow):
 
             self.notificationSendDateInput.setDateTime(self._to_qt_datetime(notification.fecha_envio))
         else:
-            self._show_error_message("Error", "No se pudo cargar la notificación para edición.")
+            self._show_warning_message("Notificación No Encontrada", f"La notificación con ID {self.current_notification_id} no se encontró en la base de datos.")
+            self.current_notification_id = None
+            self._clear_notification_form()
+            self._load_notifications()
 
     def _delete_notification(self, notification_id):
         """Elimina una notificación previa confirmación."""
+        if not isinstance(notification_id, int) or notification_id <= 0:
+            self._show_warning_message("Error de Eliminación", "ID de notificación inválido para eliminar.")
+            return
+
         reply = QMessageBox.question(self, 'Confirmar Eliminación',
                                      f"¿Estás seguro de que quieres eliminar la notificación ID: {notification_id}?",
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
+                                     QMessageBox.Yes | QMessageBox.No, # PyQt5
+                                     QMessageBox.No) # PyQt5
+        if reply == QMessageBox.Yes: # PyQt5
             try:
                 deleted = self.notification_service.delete_notification(notification_id)
                 if deleted:
                     self._show_info_message("Éxito", "Notificación eliminada con éxito.")
                 else:
                     self._show_warning_message("Advertencia", "Notificación no encontrada.")
-                self._load_notifications()
+                    self._load_notifications()
+                    self._clear_notification_form() # Limpiar formulario después de eliminar
             except ValueError as e:
                 self._show_warning_message("Error de Validación", str(e))
             except Exception as e:
@@ -690,8 +807,6 @@ class TaskManagerApp(QMainWindow):
         """
         Crea un widget con botones de 'Editar' y 'Eliminar' para las celdas de acción de la tabla.
         """
-        from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
-        
         widget = QWidget()
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0) # Eliminar márgenes para que los botones estén más juntos
@@ -723,4 +838,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = TaskManagerApp()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec_()) # En PyQt5, es app.exec_()
