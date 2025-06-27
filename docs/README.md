@@ -148,6 +148,28 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
     python app_gui.py
     ```
     Si todas las pruebas pasan, verás un mensaje "OK". En caso contrario, se mostrarán los detalles de los fallos.
+    
+    Coverage
+    ```
+   pip install coverage
+    ```
+    ```
+   coverage run -m unittest discover tests
+    ```
+    ```
+    coverage html
+    ```
+    
+    ```
+    start htmlcov\index.html
+    ```
+    ```
+    coverage report
+    ```
+    ```
+    start htmlcov\index.html
+    ```
+    
 
 ### Lista de Integrantes del Equipo
 - Cortez Ponce Brianna Shaquel
