@@ -15,6 +15,8 @@ Este proyecto implementa un sistema básico de gestión de tareas con funcionali
 * **Pruebas Unitarias Robustas**: Cobertura de pruebas para la lógica de negocio, utilizando una base de datos en memoria para asegurar el aislamiento.
   
 * **Tener una estructura organizada (ej: src/, docs/, tests/).
+  
+* **Para mejorar la estetica del GUI aplicamos estilos CSS (conocidos como Qt Style Sheets - QSS).
 
 * **Diseño por Capas**: Organización clara del código en `models`, `repositories` y `services`.
 
