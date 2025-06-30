@@ -6,18 +6,250 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>700</height>
+    <width>905</width>
+    <height>806</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Gestor de Tareas TO-DO-LIST CRUD</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">
+    /* Estilo general de la ventana principal */
+    QMainWindow#MainWindow {
+        background-color: #ecf0f1; /* Gris muy claro */
+    }
+
+    /* QTabWidget (contenedor de pestañas) */
+    QTabWidget::pane { /* El marco de las pestañas */
+        border: 1px solid #bdc3c7;
+        background-color: white;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    QTabBar::tab {
+        background: #dfe6e9; /* Gris más oscuro para pestañas inactivas */
+        border: 1px solid #bdc3c7;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        padding: 10px 15px;
+        font-size: 14px;
+        width:95px; 
+        font-weight: bold;
+        color: #34495e;
+        margin-right: 2px;
+    }
+
+    QTabBar::tab:selected {
+        background: #3498db; /* Azul para pestaña activa */
+        color: white;
+        border-color: #3498db;
+        border-bottom-color: #3498db; /* Para que la línea de abajo coincida */
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    QTabBar::tab:hover {
+        background: #aeb6bf; /* Gris más claro al pasar el ratón */
+    }
+    QTabBar::tab:selected:hover {
+        background: #2980b9; /* Azul más oscuro al pasar el ratón en activa */
+    }
+
+    /* Títulos de sección dentro de las pestañas */
+    QLabel {
+        color: #2c3e50;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    QLabel[objectName$=&quot;title&quot;] { /* Selecciona etiquetas cuyo nombre termina en &quot;title&quot; */
+        color: #2c3e50;
+        font-size: 18px;
+        font-weight: bold;
+        padding-bottom: 10px;
+        padding-top: 10px;
+    }
+
+    /* Campos de entrada de texto (QLineEdit, QTextEdit) */
+    QLineEdit, QTextEdit {
+        border: 1px solid #bdc3c7;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background-color: white;
+        font-size: 14px;
+        color: #2c3e50;
+    }
+    QLineEdit:focus, QTextEdit:focus {
+        border: 1px solid #3498db;
+    }
+
+    /* ComboBoxes (QComboBox) */
+    QComboBox {
+        border: 1px solid #bdc3c7;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background-color: white;
+        font-size: 14px;
+        color: #2c3e50;
+    }
+    QComboBox::drop-down {
+        border-left: 1px solid #bdc3c7;
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+        width: 25px;
+    }
+    QComboBox::down-arrow {
+        
+        width: 16px;
+        height: 16px;
+    }
+    QComboBox QAbstractItemView { /* Estilo para los elementos del desplegable */
+        border: 1px solid #bdc3c7;
+        border-radius: 8px;
+        background-color: white;
+        selection-background-color: #3498db;
+        color: #2c3e50;
+    }
+
+    /* DateTimeEdit (QDateTimeEdit) */
+    QDateTimeEdit {
+        border: 1px solid #bdc3c7;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background-color: white;
+        font-size: 14px;
+        color: #2c3e50;
+    }
+    QDateTimeEdit::drop-down {
+        border-left: 1px solid #bdc3c7;
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+        width: 25px;
+    }
+    QDateTimeEdit::down-arrow {
+        
+        width: 16px;
+        height: 16px;
+    }
+
+    /* CheckBox (QCheckBox) */
+    QCheckBox {
+        spacing: 5px;
+        font-size: 14px;
+        color: #34495e;
+    }
+    QCheckBox::indicator {
+        width: 18px;
+        height: 18px;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+        background-color: white;
+    }
+    QCheckBox::indicator:checked {
+        background-color: #3498db;
+        border: 1px solid #3498db;
+        
+    }
+
+    /* Botones de acción (Guardar, Limpiar) */
+    QPushButton {
+        background-color: #3498db; /* Azul */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 15px;
+        font-weight: bold;
+        min-width: 100px;
+        
+    }
+    QPushButton:hover {
+        background-color: #2980b9; /* Azul más oscuro */
+        
+    }
+    QPushButton#clearUserButton, QPushButton#clearCategoryButton,
+    QPushButton#clearTaskButton, QPushButton#clearNotificationButton {
+        background-color: #f39c12; /* Naranja para limpiar */
+    }
+    QPushButton#clearUserButton:hover, QPushButton#clearCategoryButton:hover,
+    QPushButton#clearTaskButton:hover, QPushButton#clearNotificationButton:hover {
+        background-color: #e67e22; /* Naranja más oscuro */
+    }
+
+    /* Botones de Editar/Eliminar en tablas (creados programáticamente) */
+    /* Estos estilos se aplicarán a los QPushButton creados en _create_actions_widget */
+    QPushButton[text=&quot;Editar&quot;] {
+        background-color: #3b82f6; /* Azul más claro */
+        color: white;
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 13px;
+        min-width: 60px;
+        
+    }
+    QPushButton[text=&quot;Editar&quot;]:hover {
+        background-color: #2563eb;
+    }
+    QPushButton[text=&quot;Eliminar&quot;] {
+        background-color: #ef4444; /* Rojo */
+        color: white;
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 13px;
+        min-width: 60px;
+        
+    }
+    QPushButton[text=&quot;Eliminar&quot;]:hover {
+        background-color: #dc2626;
+    }
+
+    /* QTableWidget */
+    QTableWidget {
+        border: 1px solid #bdc3c7;
+        border-radius: 8px;
+        gridline-color: #dfe6e9;
+        font-size: 13px;
+        color: #34495e;
+        background-color: white;
+    }
+    QTableWidget::item {
+        padding: 5px;
+    }
+    QTableWidget::item:selected {
+        background-color: #aed6f1; /* Azul claro al seleccionar fila */
+        color: #2c3e50;
+    }
+    QTableWidget QHeaderView::section { /* Encabezados de la tabla */
+        background-color: #34495e; /* Gris oscuro */
+        color: white;
+        padding: 8px;
+        border: 1px solid #2c3e50;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    QTableWidget QHeaderView::section:horizontal {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    QTableWidget QHeaderView::section:last {
+        border-top-right-radius: 8px;
+    }
+    QTableWidget QHeaderView::section:first {
+        border-top-left-radius: 8px;
+    }
+    /* Alternar colores de fila para mejor legibilidad */
+    QTableWidget::item:alternate {
+        background-color: #f8f9fa; /* Color más claro para filas alternas */
+    }
+
+   </string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QMessageBox" name="messageBox">
-      <property name="text">
+      <property name="text" stdset="0">
        <string/>
       </property>
      </widget>
@@ -25,7 +257,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="usersTab">
        <attribute name="title">
@@ -36,7 +268,7 @@
          <widget class="QLabel" name="label_users_title">
           <property name="font">
            <font>
-            <pointsize>14</pointsize>
+            
             <bold>true</bold>
            </font>
           </property>
@@ -142,7 +374,7 @@
          <widget class="QLabel" name="label_categories_title">
           <property name="font">
            <font>
-            <pointsize>14</pointsize>
+            
             <bold>true</bold>
            </font>
           </property>
@@ -220,7 +452,7 @@
          <widget class="QLabel" name="label_tasks_title">
           <property name="font">
            <font>
-            <pointsize>14</pointsize>
+            
             <bold>true</bold>
            </font>
           </property>
@@ -385,7 +617,7 @@
          <widget class="QLabel" name="label_task_categories_title">
           <property name="font">
            <font>
-            <pointsize>11</pointsize>
+            
             <bold>true</bold>
            </font>
           </property>
@@ -450,7 +682,7 @@
          <widget class="QLabel" name="label_notifications_title">
           <property name="font">
            <font>
-            <pointsize>14</pointsize>
+            
             <bold>true</bold>
            </font>
           </property>
@@ -544,9 +776,9 @@
    <class>QMessageBox</class>
    <extends>QDialog</extends>
    <header>PyQt5.QtWidgets</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
  <connections/>
 </ui>
-
